@@ -35,7 +35,7 @@ Para instalar o locallib é recomendado que você crie um usuário limitado para
 
 Após instalar é necessário acrescentar no arquivo `.bashrc` ou `.profile` as variáveis de ambiente para a sua aplicação. Para obtê-las, execute `perl -Mlocal::lib`.
 
-Após feita a instalação, use o script `start_nmap_api.sh` para iniciar a aplicação e `stop_nmap_api.sh` para parar a execução.
+Após feita a instalação, use o script `control_nmap_api.sh start` para iniciar a aplicação e `control_nmap_api.sh stop` para parar a execução.
 
 
 Configuração
