@@ -49,6 +49,10 @@ A configuração da API é toda feita por variáveis de ambiente. Um exemplo de 
 	export NMAP_API_HOST_COLLECTION="hosts"
 	export NMAP_API_SCAN_COLLECTION="scans"
 	export NMAP_API_LOG="LOCAL"
+	export NMAP_API_URL='http://*:8080'
+	export NMAP_API_WORKERS=16
+	export NMAP_API_USER=nobody
+	export NMAP_API_GROUP=nobody
 
 Nesse exemplo, colocamos os eventos para serem gerados localmente, logo deverá ser criada no diretório da aplicação uma pasta chamada `log`.
 
@@ -62,6 +66,10 @@ No exemplo a seguir, configuramos para o envio de eventos para um coletor remoto
 	export NMAP_API_LOG="NET"
 	export NMAP_API_SYSLOG_PORT="514"
 	export NMAP_API_SYSLOG_HOST="192.168.0.32"
+	export NMAP_API_URL='http://*:8080'
+	export NMAP_API_WORKERS=16
+	export NMAP_API_USER=nobody
+	export NMAP_API_GROUP=nobody
 
 Nesse exemplo, os eventos serão enviados via Syslog para o host 192.168.0.32, na porta 514.
 

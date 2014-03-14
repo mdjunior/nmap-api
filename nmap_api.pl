@@ -617,6 +617,18 @@ put '/api/#version/import' => sub {
     $self->render( json => Model::import( $self->req->body ), status => 201 );
 };
 
+app->config(
+    hypnotoad => {
+        listen    => ["$ENV{NMAP_API_URL}"],
+        workers   => $ENV{NMAP_API_WORKERS},
+        clients   => 1,                        # is a blocking API
+        lock_file => 'run/nmap_api.lock',
+        pid_file  => 'run/nmap_api.pid',
+        user      => $ENV{NMAP_API_USER},
+        group     => $ENV{NMAP_API_GROUP},
+    }
+);
+
 app->start;
 __DATA__
 @@ exception.html.ep
