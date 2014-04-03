@@ -141,7 +141,7 @@ package Model;
 use strict;
 use warnings;
 use XML::Twig;
-use NMAP::Parser;
+use Nmap::Parser;
 use MongoDB;
 use Data::Printer alias => 'Dumper';
 use Hash::Merge qw( merge );
