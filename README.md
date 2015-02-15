@@ -114,6 +114,20 @@ Produz uma resposta:
 Onde `total` é a quantidade de scans na base.
 
 
+### Listagem de scans (GET /api/1.0/scans)
+
+	http://localhost:3000/api/1.0/scans
+
+Produz uma resposta:
+
+	[
+		"1424012777",
+		"1424012789"
+	]
+
+Onde cada item é o timestamp do scan. No caso de scans com o mesmo timestamp, somente um é mostrado.
+
+
 ### Obtendo item (GET /api/1.0/host/`<IP>`)
 
 	http://localhost:3000/api/1.0/host/192.168.24.1

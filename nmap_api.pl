@@ -175,6 +175,21 @@ sub get_hosts {
 }
 
 #######################################
+# Funcao que retorna os scans cadastrados
+#######################################
+sub get_scans {
+    my $scans = $db->run_command(
+        [
+            distinct => $ENV{NMAP_API_SCAN_COLLECTION},
+            key      => 'timestamp',
+            query    => {}
+        ]
+    );
+
+    return $scans->{values};
+}
+
+#######################################
 # Funcao que retorna informacoes sobre um host
 #######################################
 sub host {
@@ -619,6 +634,13 @@ get '/api/#version/net/#addr/:mask' => sub {
             $port, $service
         )
     );
+};
+
+get '/api/#version/scans' => sub {
+    my $self = shift;
+
+    $self->render(json => Model::get_scans());
+    return;
 };
 
 put '/api/#version/scans' => sub {
