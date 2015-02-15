@@ -608,7 +608,7 @@ get '/api/#version/net/#addr/:mask' => sub {
     );
 };
 
-put '/api/#version/import' => sub {
+put '/api/#version/scans' => sub {
     my $self = shift;
     if ( $self->param('version') != $VERSION ) {
         $self->render( json => Utils::error( '100', $self->param('version') ) );

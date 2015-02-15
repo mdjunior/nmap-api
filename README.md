@@ -326,7 +326,7 @@ A resposta é semelhante a anterior.
 
 ### Inserindo item
 
-	curl --upload-file nmap_result.xml 'http://localhost:3000/api/1.0/import'
+	curl --upload-file nmap_result.xml 'http://localhost:3000/api/1.0/scans'
 
 Produz uma resposta conforme a seguir em caso de sucesso:
 
