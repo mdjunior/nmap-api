@@ -143,7 +143,7 @@ use warnings;
 use XML::Twig;
 use Nmap::Parser;
 use MongoDB;
-use Data::Printer alias => 'Dumper';
+use Mojo::JSON qw(j);
 use Hash::Merge qw( merge );
 use NetAddr::IP;
 
@@ -419,7 +419,7 @@ sub import {
 #######################################
 sub add_scan {
     my $scan_info = shift;
-    my $scan_str  = Dumper($scan_info);
+    my $scan_str  = j($scan_info);
     $scan_str =~ s/\n//smxg;
     Utils::log_wrapper(
 "function=|add_scan| action=|add_scan| desc=|adicionando scan a colecao| info=|$scan_str|"

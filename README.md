@@ -14,7 +14,6 @@ Para usar a NMAP API você precisa instalar os seguintes modulos Perl:
 * [Mojo::JSON](http://mojolicio.us/perldoc/Mojo/JSON) -- Usado para ler JSON como um hash
 * [Mojo::Log](http://mojolicio.us/perldoc/Mojo/Log) -- Usado para o envio de eventos localmente
 * [Readonly](https://metacpan.org/pod/Readonly) -- Usado para gerar as constantes
-* [Data::Printer](https://metacpan.org/pod/Data::Printer) -- Usado para debug de variáveis
 * [Hash::Merge](https://metacpan.org/pod/Hash::Merge) -- Usado para mesclar resultados (útil quando o resultado vem de lugares diferentes)
 * [Net::Syslog](https://metacpan.org/pod/Net::Syslog) -- Usado para o envio de eventos via syslog
 * [Nmap::Parser](https://metacpan.org/pod/Nmap::Parser) -- Usado para fazer o parser dos arquivos XML do NMAP
@@ -25,7 +24,7 @@ Para usar a NMAP API você precisa instalar os seguintes modulos Perl:
 
 Se você estiver instalando somente para testar, você pode executar:
 
-	cpanm MongoDB Mojolicious::Lite Mojo::JSON Mojo::Log Readonly Data::Printer Hash::Merge Net::Syslog Nmap::Parser Scalar::Util::Numeric Data::Validate::IP XML::Twig NetAddr::IP
+	cpanm MongoDB Mojolicious::Lite Mojo::JSON Mojo::Log Readonly Hash::Merge Net::Syslog Nmap::Parser Scalar::Util::Numeric Data::Validate::IP XML::Twig NetAddr::IP
 
 Se você estiver instalando a aplicação para um ambiente de produção, é recomendável que você faça uso da [local::lib](https://metacpan.org/pod/local::lib) para não modificar o Perl instalado em seu sistema. Outra alternativa é usar o [perlbrew](http://perlbrew.pl/).
 

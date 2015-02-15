@@ -1,4 +1,3 @@
-requires 'Data::Printer';
 requires 'Hash::Merge';
 requires 'Mojolicious';
 requires 'MongoDB';
