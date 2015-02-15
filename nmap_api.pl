@@ -160,7 +160,7 @@ sub count {
     my $collection = shift;
     my $count      = $db->get_collection($collection)->count;
     my %hash       = (
-        result => 'sucesso',
+        result => 'success',
         total  => $count,
     );
     return \%hash;

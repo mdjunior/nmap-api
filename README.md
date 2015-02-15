@@ -312,14 +312,14 @@ Já que nenhum host da rede possui tal critério.
 
 ### Obtendo itens de uma rede com determinado serviço (independente da porta que o serviço está executando)
 
-	http://localhost:3000/api/1.0/net/192.168.24.0/30?port=telnet
+	http://localhost:3000/api/1.0/net/192.168.24.0/30?service=telnet
 
 A resposta é semelhante a anterior.
 
 
 ### Obtendo itens de uma rede com determinado serviço em uma porta específica
 
-	http://localhost:3000/api/1.0/net/192.168.24.0/30?port=telnet&port=23
+	http://localhost:3000/api/1.0/net/192.168.24.0/30?service=telnet&port=23
 
 A resposta é semelhante a anterior.
 
