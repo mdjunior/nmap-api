@@ -22,20 +22,13 @@ Para usar a NMAP API você precisa instalar os seguintes modulos Perl:
 * [XML::Twig](https://metacpan.org/pod/XML::Twig) -- Usado para validar se o XML enviado para importação é válido
 * [NetAddr::IP](https://metacpan.org/pod/NetAddr::IP) -- Usado para gerar todos os endereços IP dentro de uma rede
 
-Se você estiver instalando somente para testar, você pode executar:
+É recomendável que você faça uso do [carton](https://metacpan.org/pod/Carton) para não modificar o Perl instalado em seu sistema e fazer a gestão das dependencias de forma mais fácil. Outras alternativas são usar o [perlbrew](http://perlbrew.pl/), [plenv](https://github.com/tokuhirom/plenv) ou [local::lib](https://metacpan.org/pod/local::lib).
 
-	cpanm MongoDB Mojolicious::Lite Mojo::JSON Mojo::Log Readonly Hash::Merge Net::Syslog Nmap::Parser Scalar::Util::Numeric Data::Validate::IP XML::Twig NetAddr::IP
+Usando o carton, para instalar as dependências, basta executar na pasta da aplicação:
 
-Se você estiver instalando a aplicação para um ambiente de produção, é recomendável que você faça uso da [local::lib](https://metacpan.org/pod/local::lib) para não modificar o Perl instalado em seu sistema. Outra alternativa é usar o [perlbrew](http://perlbrew.pl/).
+	carton install
 
-Para instalar o locallib é recomendado que você crie um usuário limitado para sua aplicação, no caso, você pode criar um usuário chamado `nmap` e instalar o [local::lib](https://metacpan.org/pod/local::lib) no home desse usuário.
-
-	cpanm local::lib
-
-Após instalar é necessário acrescentar no arquivo `.bashrc` ou `.profile` as variáveis de ambiente para a sua aplicação. Para obtê-las, execute `perl -Mlocal::lib`.
-
-Após feita a instalação, use o script `control_nmap_api.sh start` para iniciar a aplicação e `control_nmap_api.sh stop` para parar a execução.
-
+Após instalar é necessário configurar as variáveis de ambiente da aplicação. Elas são necessárias tanto para iniciar a aplicação quanto para pará-la.
 
 Configuração
 ------------
@@ -55,7 +48,7 @@ A configuração da API é toda feita por variáveis de ambiente. Um exemplo de 
 
 Nesse exemplo, colocamos os eventos para serem gerados localmente, logo deverá ser criada no diretório da aplicação uma pasta chamada `log`.
 
-No exemplo a seguir, configuramos para o envio de eventos para um coletor remoto:
+No exemplo a seguir, configuramos para o envio de eventos para um coletor remoto (em 192.168.0.32):
 
 	export NMAP_API_MONGO_HOST="localhost"
 	export NMAP_API_MONGO_PORT="27017"
@@ -71,6 +64,22 @@ No exemplo a seguir, configuramos para o envio de eventos para um coletor remoto
 	export NMAP_API_GROUP=nobody
 
 Nesse exemplo, os eventos serão enviados via Syslog para o host 192.168.0.32, na porta 514.
+
+
+Iniciando
+---------
+
+Se você estiver usando o Carton, para iniciar a aplicação, você pode executar:
+
+	carton exec hypnotoad nmap-api.pl
+
+E para parar você pode executar:
+
+	carton exec hypnotoad -s nmap-api.pl
+
+Caso queira modificar a aplicação e deseja que ela reinicie a cada mudança no código, use:
+
+	carton exec morbo nmap-api.pl
 
 
 Uso
