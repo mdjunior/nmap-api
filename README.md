@@ -79,7 +79,7 @@ Uso
 A NMAP API é uma API que tenta seguir os padrões REST. Assim, ela disponibiliza de forma fácil o obtenção e envio de dados.
 
 
-### Contagem de hosts
+### Contagem de hosts (GET /api/1.0/hosts/count)
 
 	http://localhost:3000/api/1.0/hosts/count
 
@@ -89,7 +89,8 @@ Produz uma resposta:
 
 Onde `total` é a quantidade de hosts na base.
 
-### Listagem de hosts
+
+### Listagem de hosts (GET /api/1.0/hosts)
 
 	http://localhost:3000/api/1.0/hosts
 
@@ -101,7 +102,8 @@ Produz uma resposta:
     	"192.168.200.21"
 	]
 
-### Contagem de scans
+
+### Contagem de scans (GET /api/1.0/scans/count)
 
 	http://localhost:3000/api/1.0/scans/count
 
@@ -112,7 +114,7 @@ Produz uma resposta:
 Onde `total` é a quantidade de scans na base.
 
 
-### Obtendo item
+### Obtendo item (GET /api/1.0/host/`<IP>`)
 
 	http://localhost:3000/api/1.0/host/192.168.24.1
 
@@ -146,7 +148,7 @@ Produz uma resposta com os dados do host pedido:
 	}
 
 
-### Obtendo itens de uma rede
+### Obtendo itens de uma rede (GET /api/1.0/net/`<network>`/`<mask>`)
 
 	http://localhost:3000/api/1.0/net/192.168.24.0/30
 
@@ -182,7 +184,7 @@ Produz uma resposta com os dados da rede pedida:
 	}
 
 
-### Obtendo itens de uma rede com determinada porta aberta
+### Obtendo itens de uma rede com determinada porta aberta (GET /api/1.0/net/`<network>`/`<netmask>`?port=`<port>`)
 
 	http://localhost:3000/api/1.0/net/192.168.24.0/30?port=23
 
@@ -320,21 +322,21 @@ Caso o host não possua a porta aberta, a respota seria:
 Já que nenhum host da rede possui tal critério.
 
 
-### Obtendo itens de uma rede com determinado serviço (independente da porta que o serviço está executando)
+### Obtendo itens de uma rede com determinado serviço (independente da porta que o serviço está executando) (GET /api/1.0/net/`<network>`/`<mask>`?service=`<service>`)
 
 	http://localhost:3000/api/1.0/net/192.168.24.0/30?service=telnet
 
 A resposta é semelhante a anterior.
 
 
-### Obtendo itens de uma rede com determinado serviço em uma porta específica
+### Obtendo itens de uma rede com determinado serviço em uma porta específica (GET /api/1.0/net/`<network>`/`<mask>`?service=`<service>`&port=`<port>`)
 
 	http://localhost:3000/api/1.0/net/192.168.24.0/30?service=telnet&port=23
 
 A resposta é semelhante a anterior.
 
 
-### Inserindo item
+### Inserindo item (PUT /api/1.0/scans)
 
 	curl --upload-file nmap_result.xml 'http://localhost:3000/api/1.0/scans'
 
