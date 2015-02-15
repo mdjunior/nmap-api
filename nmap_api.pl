@@ -262,7 +262,8 @@ sub get_host_info {
     }
     else {
         Utils::log_wrapper(
-            'function=|get_host_info| action=|no_using_parameter| desc=|| info=||');
+            'function=|get_host_info| action=|no_using_parameter| desc=|| info=||'
+        );
         $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})
             ->find({timestamp => "$scan_number", 'hosts.addr' => $addr});
     }
@@ -587,7 +588,11 @@ get '/api/#version/hosts/#addr' => sub {
     }
     if (defined $self->param('scan')) {
         $self->render(
-            json => Model::get_host_info($self->param('addr'), $self->param('scan')));
+            json => Model::get_host_info(
+                $self->param('addr'),
+                $self->param('scan')
+            )
+        );
         return;
     }
     $self->render(json => Model::get_host_info($self->param('addr')));
