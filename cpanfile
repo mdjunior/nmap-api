@@ -1,0 +1,11 @@
+requires 'Data::Printer';
+requires 'Hash::Merge';
+requires 'Mojolicious';
+requires 'MongoDB';
+requires 'Nmap::Parser';
+requires 'Net::Syslog';
+requires 'NetAddr::IP';
+requires 'Data::Validate::IP';
+requires 'Readonly';
+requires 'Scalar::Util::Numeric';
+requires 'XML::Twig';
