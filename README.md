@@ -128,9 +128,43 @@ Produz uma resposta:
 Onde cada item é o timestamp do scan. No caso de scans com o mesmo timestamp, somente um é mostrado.
 
 
-### Obtendo item (GET /api/1.0/host/`<IP>`)
+### Obtendo item (GET /api/1.0/hosts/`<IP>`)
 
-	http://localhost:3000/api/1.0/host/192.168.24.1
+	http://localhost:3000/api/1.0/hosts/192.168.24.1
+
+Produz uma resposta com os dados do host pedido:
+
+	{
+	    "distance": null,
+	    "status": "up",
+	    "mac_addr": "00:18:74:15:F2:80",
+	    "data": [{
+	        "proto": "tcp",
+	        "rpc": null,
+	        "version": null,
+	        "fingerprint": null,
+	        "service": "telnet",
+	        "port": "23",
+	        "additional_info": {
+	            "banner": {
+	                "output": "\\xFF\\xFB\\x01\\xFF\\xFB\\x03\\xFF\\xFD\\x18\\xFF\\xFD\\x1F\\x0D\\x0A\\x0D..."
+	            }
+	        },
+	        "product": "Cisco router"
+	    }],
+	    "hostnames": ["rt.example.net"],
+	    "os": null,
+	    "scans": [1390747279],
+	    "os_family": null,
+	    "mac_vendor": "Cisco Systems",
+	    "uptime": null,
+	    "addr": "192.168.24.1"
+	}
+
+
+### Obtendo item de determinado scan (GET /api/1.0/hosts/`<IP>`?scan=`<scan>`)
+
+	http://localhost:3000/api/1.0/hosts/192.168.24.1?scan=1390747279
 
 Produz uma resposta com os dados do host pedido:
 

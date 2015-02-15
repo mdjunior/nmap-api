@@ -192,7 +192,7 @@ sub get_scans {
 #######################################
 # Funcao que retorna informacoes sobre um host
 #######################################
-sub host {
+sub get_host_info {
     my $addr        = shift;
     my $scan_number = shift;
     my $port        = shift;
@@ -214,7 +214,7 @@ sub host {
     # verifica se exixte numero de scan associado
     if (defined $scan_number) {
         Utils::log_wrapper(
-            "function=|host| action=|using_parameter_scan| desc=|| info=|$scan_number|"
+            "function=|get_host_info| action=|using_parameter_scan| desc=|| info=|$scan_number|"
         );
     }
     else {
@@ -225,7 +225,7 @@ sub host {
 
     if (defined $port && defined $service) {
         Utils::log_wrapper(
-            "function=|host| action=|using_parameters_port_service| desc=|| info=|PORT:$port SERVICE:$service|"
+            "function=|get_host_info| action=|using_parameters_port_service| desc=|| info=|PORT:$port SERVICE:$service|"
         );
         $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})->find(
             {
@@ -238,7 +238,7 @@ sub host {
     }
     elsif (defined $port) {
         Utils::log_wrapper(
-            "function=|host| action=|using_parameter_port| desc=|| info=|PORT:$port|"
+            "function=|get_host_info| action=|using_parameter_port| desc=|| info=|PORT:$port|"
         );
         $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})->find(
             {
@@ -250,7 +250,7 @@ sub host {
     }
     elsif (defined $service) {
         Utils::log_wrapper(
-            "function=|host| action=|using_parameter_service| desc=|| info=|SERVICE:$service|"
+            "function=|get_host_info| action=|using_parameter_service| desc=|| info=|SERVICE:$service|"
         );
         $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})->find(
             {
@@ -262,7 +262,7 @@ sub host {
     }
     else {
         Utils::log_wrapper(
-            'function=|host| action=|no_using_parameter| desc=|| info=||');
+            'function=|get_host_info| action=|no_using_parameter| desc=|| info=||');
         $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})
             ->find({timestamp => "$scan_number", 'hosts.addr' => $addr});
     }
@@ -573,7 +573,7 @@ get '/api/#version/hosts' => sub {
     return;
 };
 
-get '/api/#version/host/#addr' => sub {
+get '/api/#version/hosts/#addr' => sub {
     my $self = shift;
 
     if ($self->param('version') != $VERSION) {
@@ -587,10 +587,10 @@ get '/api/#version/host/#addr' => sub {
     }
     if (defined $self->param('scan')) {
         $self->render(
-            json => Model::host($self->param('addr'), $self->param('scan')));
+            json => Model::get_host_info($self->param('addr'), $self->param('scan')));
         return;
     }
-    $self->render(json => Model::host($self->param('addr')));
+    $self->render(json => Model::get_host_info($self->param('addr')));
 };
 
 get '/api/#version/net/#addr/:mask' => sub {
