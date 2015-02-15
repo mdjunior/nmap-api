@@ -51,11 +51,11 @@ my %error = (
 sub log_wrapper {
     my $log = shift;
 
-    if ( $ENV{NMAP_API_LOG} eq 'LOCAL' ) {
+    if ($ENV{NMAP_API_LOG} eq 'LOCAL') {
         my $log_local = Mojo::Log->new;
         $log_local->info($log);
     }
-    elsif ( $ENV{NMAP_API_LOG} eq 'NET' ) {
+    elsif ($ENV{NMAP_API_LOG} eq 'NET') {
         my $log_net = Net::Syslog->new(
             Name       => 'NMAP_API',
             Facility   => 'local7',
@@ -63,7 +63,7 @@ sub log_wrapper {
             SyslogPort => $ENV{NMAP_API_SYSLOG_PORT},
             SyslogHost => $ENV{NMAP_API_SYSLOG_HOST},
         );
-        $log_net->send( $log, Priority => 'info' );
+        $log_net->send($log, Priority => 'info');
     }
     return;
 }
@@ -75,15 +75,11 @@ sub error {
     my $code = shift;
     my $info = shift;
 
-    if ( !defined $info ) { $info = q{}; }
+    if (!defined $info) { $info = q{}; }
 
     Utils::log_wrapper("code=|$code| desc=|$error{$code}| info=|$info|");
 
-    my %hash = (
-        result  => 'error',
-        code    => $code,
-        message => $error{$code},
-    );
+    my %hash = (result => 'error', code => $code, message => $error{$code},);
     return \%hash;
 }
 
@@ -91,47 +87,47 @@ sub valida_bloco {
     my $net  = shift;
     my $mask = shift;
 
-    if ( !defined $mask ) {
-        if ( is_ipv4($net) ) {
+    if (!defined $mask) {
+        if (is_ipv4($net)) {
             $mask = $IPV4_BLOCO_MAX;
         }
-        elsif ( is_ipv6($net) ) {
+        elsif (is_ipv6($net)) {
             $mask = $IPV6_BLOCO_MAX;
         }
     }
 
-    if ( is_ipv4($net) ) {
-        if ( $mask > $IPV4_BLOCO_MAX || $mask < $IPV4_BLOCO_MIN ) {
-            return Utils::error( '109', "NET:$net MASK:$mask" );
+    if (is_ipv4($net)) {
+        if ($mask > $IPV4_BLOCO_MAX || $mask < $IPV4_BLOCO_MIN) {
+            return Utils::error('109', "NET:$net MASK:$mask");
         }
     }
-    elsif ( is_ipv6($net) ) {
-        if ( $mask > $IPV6_BLOCO_MAX || $mask < $IPV6_BLOCO_MIN ) {
-            return Utils::error( '109', "NET:$net MASK:$mask" );
+    elsif (is_ipv6($net)) {
+        if ($mask > $IPV6_BLOCO_MAX || $mask < $IPV6_BLOCO_MIN) {
+            return Utils::error('109', "NET:$net MASK:$mask");
         }
     }
-    my %hash = ( result => 'success', );
+    my %hash = (result => 'success',);
     return \%hash;
 }
 
 sub valida_port {
     my $port = shift;
-    if ( $port < $PORT_MIN && $port > $PORT_MAX ) {
-        return Utils::error( '110', "PORT: $port" );
+    if ($port < $PORT_MIN && $port > $PORT_MAX) {
+        return Utils::error('110', "PORT: $port");
     }
-    elsif ( !isint($port) ) {
-        return Utils::error( '111', "PORT: $port" );
+    elsif (!isint($port)) {
+        return Utils::error('111', "PORT: $port");
     }
-    my %hash = ( result => 'success', );
+    my %hash = (result => 'success',);
     return \%hash;
 }
 
 sub valida_service {
     my $service = shift;
-    if ( $service !~ /[\w?-]+/smx ) {
-        return Utils::error( '112', "SERVICE: $service" );
+    if ($service !~ /[\w?-]+/smx) {
+        return Utils::error('112', "SERVICE: $service");
     }
-    my %hash = ( result => 'success', );
+    my %hash = (result => 'success',);
     return \%hash;
 }
 
@@ -151,7 +147,7 @@ my $client = MongoDB::MongoClient->new(
     host => $ENV{NMAP_API_MONGO_HOST},
     port => $ENV{NMAP_API_MONGO_PORT}
 );
-my $db = $client->get_database( $ENV{NMAP_API_DATABASE} );
+my $db = $client->get_database($ENV{NMAP_API_DATABASE});
 
 #######################################
 # Funcao que conta a quantidade atuais de documentos em uma colecao
@@ -159,11 +155,23 @@ my $db = $client->get_database( $ENV{NMAP_API_DATABASE} );
 sub count {
     my $collection = shift;
     my $count      = $db->get_collection($collection)->count;
-    my %hash       = (
-        result => 'success',
-        total  => $count,
-    );
+    my %hash       = (result => 'success', total => $count,);
     return \%hash;
+}
+
+#######################################
+# Funcao que retorna os hosts cadastrados
+#######################################
+sub get_hosts {
+    my $hosts = $db->run_command(
+        [
+            distinct => $ENV{NMAP_API_HOST_COLLECTION},
+            key      => 'addr',
+            query    => {}
+        ]
+    );
+
+    return $hosts->{values};
 }
 
 #######################################
@@ -175,36 +183,36 @@ sub host {
     my $port        = shift;
     my $service     = shift;
 
-    my $hosts = $db->get_collection( $ENV{NMAP_API_HOST_COLLECTION} )
-      ->find( { addr => $addr } );
+    my $hosts = $db->get_collection($ENV{NMAP_API_HOST_COLLECTION})
+        ->find({addr => $addr});
     my $num = $hosts->count;
-    if ( $num > 1 ) {
-        return Utils::error( '103', "IP:$addr HOSTS_NUM:$num" );
+    if ($num > 1) {
+        return Utils::error('103', "IP:$addr HOSTS_NUM:$num");
     }
-    elsif ( $num < 1 ) {
-        return Utils::error( '107', "IP:$addr HOSTS_NUM:$num" );
+    elsif ($num < 1) {
+        return Utils::error('107', "IP:$addr HOSTS_NUM:$num");
     }
     my $doc = $hosts->next;    # Guarda informacoes sobre host
 
     my $scans;
 
     # verifica se exixte numero de scan associado
-    if ( defined $scan_number ) {
+    if (defined $scan_number) {
         Utils::log_wrapper(
-"function=|host| action=|using_parameter_scan| desc=|| info=|$scan_number|"
+            "function=|host| action=|using_parameter_scan| desc=|| info=|$scan_number|"
         );
     }
     else {
         # Obtendo dados mais recentes de varredura
-        my @array_scans = reverse sort { $a <=> $b } @{ $doc->{scans} };
+        my @array_scans = reverse sort { $a <=> $b } @{$doc->{scans}};
         $scan_number = $array_scans[0];    # Guarda scan mais recentes
     }
 
-    if ( defined $port && defined $service ) {
+    if (defined $port && defined $service) {
         Utils::log_wrapper(
-"function=|host| action=|using_parameters_port_service| desc=|| info=|PORT:$port SERVICE:$service|"
+            "function=|host| action=|using_parameters_port_service| desc=|| info=|PORT:$port SERVICE:$service|"
         );
-        $scans = $db->get_collection( $ENV{NMAP_API_SCAN_COLLECTION} )->find(
+        $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})->find(
             {
                 timestamp            => "$scan_number",
                 'hosts.addr'         => $addr,
@@ -213,11 +221,11 @@ sub host {
             }
         );
     }
-    elsif ( defined $port ) {
+    elsif (defined $port) {
         Utils::log_wrapper(
-"function=|host| action=|using_parameter_port| desc=|| info=|PORT:$port|"
+            "function=|host| action=|using_parameter_port| desc=|| info=|PORT:$port|"
         );
-        $scans = $db->get_collection( $ENV{NMAP_API_SCAN_COLLECTION} )->find(
+        $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})->find(
             {
                 timestamp         => "$scan_number",
                 'hosts.addr'      => $addr,
@@ -225,11 +233,11 @@ sub host {
             }
         );
     }
-    elsif ( defined $service ) {
+    elsif (defined $service) {
         Utils::log_wrapper(
-"function=|host| action=|using_parameter_service| desc=|| info=|SERVICE:$service|"
+            "function=|host| action=|using_parameter_service| desc=|| info=|SERVICE:$service|"
         );
-        $scans = $db->get_collection( $ENV{NMAP_API_SCAN_COLLECTION} )->find(
+        $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})->find(
             {
                 timestamp            => "$scan_number",
                 'hosts.addr'         => $addr,
@@ -240,20 +248,20 @@ sub host {
     else {
         Utils::log_wrapper(
             'function=|host| action=|no_using_parameter| desc=|| info=||');
-        $scans = $db->get_collection( $ENV{NMAP_API_SCAN_COLLECTION} )
-          ->find( { timestamp => "$scan_number", 'hosts.addr' => $addr } );
+        $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})
+            ->find({timestamp => "$scan_number", 'hosts.addr' => $addr});
     }
 
     my $scan_count = $scans->count;
-    if ( $scan_count != 1 ) {
-        return Utils::error( '108', "IP:$addr SCAN:$scan_number" );
+    if ($scan_count != 1) {
+        return Utils::error('108', "IP:$addr SCAN:$scan_number");
     }
     my $scan      = $scans->next;
     my $scan_info = $scan->{hosts}[0];
 
     # Fazendo merge dos hashs
-    my %scans_ = ( scans => $doc->{scans}, );
-    my %all_info = %{ merge( $scan_info, \%scans_ ) };
+    my %scans_ = (scans => $doc->{scans},);
+    my %all_info = %{merge($scan_info, \%scans_)};
 
     return \%all_info;
 }
@@ -262,19 +270,19 @@ sub host {
 # Funcao que retorna informacoes sobre uma rede
 #######################################
 sub net {
-    my ( $net, $mask, $port, $service ) = @_;
+    my ($net, $mask, $port, $service) = @_;
 
     my %net_info;    # Hash para guardar as informações da rede
     my $SLASH = q{/};
-    my $n     = NetAddr::IP->new( $net . $SLASH . $mask );
+    my $n     = NetAddr::IP->new($net . $SLASH . $mask);
 
     Utils::log_wrapper(
         "function=|net| action=|list| desc=|| info=|$net $mask|");
     my $bits = $n->bits();
-    for my $ip ( @{ $n->splitref($bits) } ) {    # laco com cada IP da rede
-        my $host_hash = host( $ip->addr, undef, $port, $service );
-        if ( !defined $host_hash->{result} ) {
-            $net_info{ $ip->addr } = $host_hash;
+    for my $ip (@{$n->splitref($bits)}) {    # laco com cada IP da rede
+        my $host_hash = host($ip->addr, undef, $port, $service);
+        if (!defined $host_hash->{result}) {
+            $net_info{$ip->addr} = $host_hash;
         }
     }
 
@@ -296,9 +304,9 @@ sub import {
     # Validando XML
     my $twig = XML::Twig->new();
     my $res  = $twig->safe_parse($xml);
-    if ( !defined $res ) {
+    if (!defined $res) {
         $twig->purge;
-        return Utils::error( '104', $xml );
+        return Utils::error('104', $xml);
     }
     $twig->purge;
 
@@ -318,23 +326,23 @@ sub import {
 
     # Para cada host
     my @hosts;
-    for my $host ( $nmap->all_hosts() ) {
+    for my $host ($nmap->all_hosts()) {
         my $os = $host->os_sig;
 
         my @hostnames = $host->all_hostnames();
         my @services;
 
         # TCP
-        for my $svcs ( $host->tcp_open_ports() ) {
+        for my $svcs ($host->tcp_open_ports()) {
             my $svc = $host->tcp_service($svcs);
             my %additional_info;
-            for my $nse_script_name ( $svc->scripts() ) {
+            for my $nse_script_name ($svc->scripts()) {
 
                 # Sanitizando nome que nao pode conter pontos
                 my $new_script_name = $nse_script_name;
                 $new_script_name =~ s/[.]/_/smxg;
-                $additional_info{$new_script_name} =
-                  $svc->scripts($nse_script_name);
+                $additional_info{$new_script_name}
+                    = $svc->scripts($nse_script_name);
             }
             my %service_info = (
                 service         => $svc->name(),
@@ -350,16 +358,16 @@ sub import {
         }
 
         # UDP
-        for my $svcs ( $host->udp_open_ports() ) {
+        for my $svcs ($host->udp_open_ports()) {
             my $svc = $host->udp_service($svcs);
             my %additional_info;
-            for my $nse_script_name ( $svc->scripts() ) {
+            for my $nse_script_name ($svc->scripts()) {
 
                 # Sanitizando nome que nao pode conter pontos
                 my $new_script_name = $nse_script_name;
                 $new_script_name =~ s/[.]/_/smxg;
-                $additional_info{$new_script_name} =
-                  $svc->scripts($nse_script_name);
+                $additional_info{$new_script_name}
+                    = $svc->scripts($nse_script_name);
             }
             my %service_info = (
                 service         => $svc->name(),
@@ -398,18 +406,18 @@ sub import {
             os             => $os->name(),
             hostnames      => \@hostnames,
         );
-        my $result = add_scan_in_host( \%update_info );
+        my $result = add_scan_in_host(\%update_info);
         Utils::log_wrapper(
-"function=|import| action=|add_scan_in_host| desc=|adicionando scan a host| info=|IP:$host_info{addr} RESULT:$result->{result}|"
+            "function=|import| action=|add_scan_in_host| desc=|adicionando scan a host| info=|IP:$host_info{addr} RESULT:$result->{result}|"
         );
 
     }
 
     # Atualizando colecao de scans
     $session_info{hosts} = \@hosts;    # Guarda na collection scans
-    my $result = add_scan( \%session_info );
+    my $result = add_scan(\%session_info);
     Utils::log_wrapper(
-"function=|import| action=|add_scan| desc=|adicionando scan a colecao| info=|TIMESTAMP:$session_info{timestamp} RESULT:$result->{result}|"
+        "function=|import| action=|add_scan| desc=|adicionando scan a colecao| info=|TIMESTAMP:$session_info{timestamp} RESULT:$result->{result}|"
     );
     return $result;
 }
@@ -422,12 +430,12 @@ sub add_scan {
     my $scan_str  = j($scan_info);
     $scan_str =~ s/\n//smxg;
     Utils::log_wrapper(
-"function=|add_scan| action=|add_scan| desc=|adicionando scan a colecao| info=|$scan_str|"
+        "function=|add_scan| action=|add_scan| desc=|adicionando scan a colecao| info=|$scan_str|"
     );
 
-    my $scan = $db->get_collection( $ENV{NMAP_API_SCAN_COLLECTION} );
+    my $scan = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION});
     $scan->insert($scan_info);
-    my %result = ( result => 'success', );
+    my %result = (result => 'success',);
     return \%result;
 }
 
@@ -449,32 +457,32 @@ sub add_scan_in_host {
     #		);
 
     # Verificando se ja existe registro do host
-    my $hosts = $db->get_collection( $ENV{NMAP_API_HOST_COLLECTION} )
-      ->find( { addr => $update_info->{addr} } );
+    my $hosts = $db->get_collection($ENV{NMAP_API_HOST_COLLECTION})
+        ->find({addr => $update_info->{addr}});
     my $num = $hosts->count;
 
-    if ( $num == 0 ) {
-        MongoDB::force_int( $update_info->{scan_timestamp} );
+    if ($num == 0) {
+        MongoDB::force_int($update_info->{scan_timestamp});
         my %hash = (
             addr      => $update_info->{addr},
             status    => $update_info->{status},
             os        => $update_info->{os},
             hostnames => $update_info->{hostnames},
-            scans     => [ $update_info->{scan_timestamp} ],
+            scans     => [$update_info->{scan_timestamp}],
         );
-        my $host = $db->get_collection( $ENV{NMAP_API_HOST_COLLECTION} );
+        my $host = $db->get_collection($ENV{NMAP_API_HOST_COLLECTION});
         Utils::log_wrapper(
-"function=|add_scan_in_host| action=|add_host| desc=|adicionando host| info=|IP:$update_info->{addr}|"
+            "function=|add_scan_in_host| action=|add_host| desc=|adicionando host| info=|IP:$update_info->{addr}|"
         );
-        $host->insert( \%hash );
-        my %result = ( result => 'success', );
+        $host->insert(\%hash);
+        my %result = (result => 'success',);
         return \%result;
     }
-    elsif ( $num == 1 ) {
+    elsif ($num == 1) {
         my $doc = $hosts->next;
-        my @array_scans = reverse sort { $a <=> $b } @{ $doc->{scans} };
+        my @array_scans = reverse sort { $a <=> $b } @{$doc->{scans}};
 
-        if ( $array_scans[0] < $update_info->{scan_timestamp} )
+        if ($array_scans[0] < $update_info->{scan_timestamp})
         {    # Se o scan eh mais atual que os existentes
             my @scans = @array_scans;
             push @scans, scalar $update_info->{scan_timestamp};
@@ -486,34 +494,34 @@ sub add_scan_in_host {
                 hostnames => $update_info->{hostnames},
                 scans     => \@scans,
             );
-            my $host = $db->get_collection( $ENV{NMAP_API_HOST_COLLECTION} );
+            my $host = $db->get_collection($ENV{NMAP_API_HOST_COLLECTION});
             Utils::log_wrapper(
-"function=|add_scan_in_host| action=|update_host_all| desc=|atualizando host| info=|IP:$update_info->{addr}|"
+                "function=|add_scan_in_host| action=|update_host_all| desc=|atualizando host| info=|IP:$update_info->{addr}|"
             );
-            $host->update( { 'addr' => $update_info->{addr} },
-                { '$set' => \%hash } );
-            my %result = ( result => 'success', );
+            $host->update({'addr' => $update_info->{addr}},
+                {'$set' => \%hash});
+            my %result = (result => 'success',);
             return \%result;
         }
-        elsif ( $array_scans[0] > $update_info->{scan_timestamp} )
+        elsif ($array_scans[0] > $update_info->{scan_timestamp})
         {    # Se o scan eh mais antigo que os existentes
-            my $host = $db->get_collection( $ENV{NMAP_API_HOST_COLLECTION} );
+            my $host = $db->get_collection($ENV{NMAP_API_HOST_COLLECTION});
             Utils::log_wrapper(
-"function=|add_scan_in_host| action=|update_host_scan_info| desc=|atualizando informacao de scan| info=|IP:$update_info->{addr}|"
+                "function=|add_scan_in_host| action=|update_host_scan_info| desc=|atualizando informacao de scan| info=|IP:$update_info->{addr}|"
             );
-            $host->update( { 'addr' => $doc->{addr} },
-                { '$push' => { 'scans' => $update_info->{scan_timestamp} } } );
-            my %result = ( result => 'success', );
+            $host->update({'addr' => $doc->{addr}},
+                {'$push' => {'scans' => $update_info->{scan_timestamp}}});
+            my %result = (result => 'success',);
             return \%result;
         }
         else {    # Se ja existe um scan com mesmo timestamp entre existentes
-            return Utils::error( '105',
-"IP:$update_info->{addr} TIMESTAMP:$update_info->{scan_timestamp}"
+            return Utils::error('105',
+                "IP:$update_info->{addr} TIMESTAMP:$update_info->{scan_timestamp}"
             );
         }
     }
     else {
-        return Utils::error( '106', "IP:$update_info->{addr} HOSTS_NUM:$num" );
+        return Utils::error('106', "IP:$update_info->{addr} HOSTS_NUM:$num");
     }
 }
 
@@ -530,38 +538,44 @@ our $VERSION = 1.0;
 
 get '/api/#version/:collection/count' => sub {
     my $self = shift;
-    if ( $self->param('version') != $VERSION ) {
-        $self->render( json => Utils::error( '100', $self->param('version') ) );
+    if ($self->param('version') != $VERSION) {
+        $self->render(json => Utils::error('100', $self->param('version')));
         return;
     }
     if (   $self->param('collection') ne $ENV{NMAP_API_HOST_COLLECTION}
-        && $self->param('collection') ne $ENV{NMAP_API_SCAN_COLLECTION} )
+        && $self->param('collection') ne $ENV{NMAP_API_SCAN_COLLECTION})
     {
-        $self->render(
-            json => Utils::error( '101', $self->param('collection') ) );
+        $self->render(json => Utils::error('101', $self->param('collection')));
         return;
     }
-    $self->render( json => Model::count( $self->param('collection') ) );
+    $self->render(json => Model::count($self->param('collection')));
+};
+
+get '/api/#version/hosts' => sub {
+    my $self = shift;
+
+    $self->render(json => Model::get_hosts());
+    return;
 };
 
 get '/api/#version/host/#addr' => sub {
     my $self = shift;
 
-    if ( $self->param('version') != $VERSION ) {
-        $self->render( json => Utils::error( '100', $self->param('version') ) );
+    if ($self->param('version') != $VERSION) {
+        $self->render(json => Utils::error('100', $self->param('version')));
         return;
     }
-    my $validacao = Utils::valida_bloco( $self->param('addr') );
-    if ( $validacao->{result} ne 'success' ) {
-        $self->render( json => $validacao );
+    my $validacao = Utils::valida_bloco($self->param('addr'));
+    if ($validacao->{result} ne 'success') {
+        $self->render(json => $validacao);
         return;
     }
-    if ( defined $self->param('scan') ) {
+    if (defined $self->param('scan')) {
         $self->render(
-            json => Model::host( $self->param('addr'), $self->param('scan') ) );
+            json => Model::host($self->param('addr'), $self->param('scan')));
         return;
     }
-    $self->render( json => Model::host( $self->param('addr') ) );
+    $self->render(json => Model::host($self->param('addr')));
 };
 
 get '/api/#version/net/#addr/:mask' => sub {
@@ -570,30 +584,29 @@ get '/api/#version/net/#addr/:mask' => sub {
     my $port    = $self->param('port');
     my $service = $self->param('service');
 
-    if ( $self->param('version') != $VERSION ) {
-        $self->render( json => Utils::error( '100', $self->param('version') ) );
+    if ($self->param('version') != $VERSION) {
+        $self->render(json => Utils::error('100', $self->param('version')));
         return;
     }
-    my $validacao =
-      Utils::valida_bloco( $self->param('addr'), $self->param('mask') );
-    if ( $validacao->{result} ne 'success' ) {
-        $self->render( json => $validacao );
+    my $validacao
+        = Utils::valida_bloco($self->param('addr'), $self->param('mask'));
+    if ($validacao->{result} ne 'success') {
+        $self->render(json => $validacao);
         return;
     }
-    if ( defined $self->param('port') ) {
-        my $validacao_port = Utils::valida_port( $self->param('port') );
-        if ( $validacao_port->{result} ne 'success' ) {
-            $self->render( json => $validacao_port );
+    if (defined $self->param('port')) {
+        my $validacao_port = Utils::valida_port($self->param('port'));
+        if ($validacao_port->{result} ne 'success') {
+            $self->render(json => $validacao_port);
             return;
         }
     }
     else { $port = undef; }
 
-    if ( defined $self->param('service') ) {
-        my $validacao_service =
-          Utils::valida_service( $self->param('service') );
-        if ( $validacao_service->{result} ne 'success' ) {
-            $self->render( json => $validacao_service );
+    if (defined $self->param('service')) {
+        my $validacao_service = Utils::valida_service($self->param('service'));
+        if ($validacao_service->{result} ne 'success') {
+            $self->render(json => $validacao_service);
             return;
         }
     }
@@ -610,11 +623,11 @@ get '/api/#version/net/#addr/:mask' => sub {
 
 put '/api/#version/scans' => sub {
     my $self = shift;
-    if ( $self->param('version') != $VERSION ) {
-        $self->render( json => Utils::error( '100', $self->param('version') ) );
+    if ($self->param('version') != $VERSION) {
+        $self->render(json => Utils::error('100', $self->param('version')));
         return;
     }
-    $self->render( json => Model::import( $self->req->body ), status => 201 );
+    $self->render(json => Model::import($self->req->body), status => 201);
 };
 
 app->config(

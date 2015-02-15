@@ -85,10 +85,21 @@ A NMAP API é uma API que tenta seguir os padrões REST. Assim, ela disponibiliz
 
 Produz uma resposta:
 
-	{"total":2038,"result":"sucesso"}
+	{"total":2038,"result":"success"}
 
 Onde `total` é a quantidade de hosts na base.
 
+### Listagem de hosts
+
+	http://localhost:3000/api/1.0/hosts
+
+Produz uma resposta:
+
+	[
+    	"192.168.200.10",
+    	"192.168.200.1",
+    	"192.168.200.21"
+	]
 
 ### Contagem de scans
 
@@ -96,7 +107,7 @@ Onde `total` é a quantidade de hosts na base.
 
 Produz uma resposta:
 
-	{"total":1939,"result":"sucesso"}
+	{"total":1939,"result":"success"}
 
 Onde `total` é a quantidade de scans na base.
 
