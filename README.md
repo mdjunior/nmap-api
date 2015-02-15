@@ -4,7 +4,7 @@ NMAP API
 A NMAP API é uma API para disponibilização de resultados encontrados pelo NMAP e ferramentas semelhantes (que compartilhem o mesmo formato de saída).
 
 
-Instalacao
+Instalação
 ----------
 
 Para usar a NMAP API você precisa instalar os seguintes modulos Perl:
