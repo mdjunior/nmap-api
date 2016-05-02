@@ -209,77 +209,88 @@ sub get_host_info {
     }
     my $doc = $hosts->next;    # Guarda informacoes sobre host
 
-    my $scans;
-
     # verifica se exixte numero de scan associado
-    if (defined $scan_number) {
+    if (defined $scan_number ) {
         Utils::log_wrapper(
-            "function=|get_host_info| action=|using_parameter_scan| desc=|| info=|$scan_number|"
+            "function=|get_host_info| action=|using_parameter_scan| desc=|| addr=|$addr| scan_number=|$scan_number|"
         );
     }
     else {
         # Obtendo dados mais recentes de varredura
         my @array_scans = reverse sort { $a <=> $b } @{$doc->{scans}};
         $scan_number = $array_scans[0];    # Guarda scan mais recentes
+        Utils::log_wrapper(
+            "function=|get_host_info| action=|no_using_parameter_scan| desc=|| addr=|$addr| scan_number=|$scan_number|"
+        );
     }
 
-    if (defined $port && defined $service) {
-        Utils::log_wrapper(
-            "function=|get_host_info| action=|using_parameters_port_service| desc=|| info=|PORT:$port SERVICE:$service|"
-        );
-        $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})->find(
-            {
-                timestamp            => "$scan_number",
-                'hosts.addr'         => $addr,
-                'hosts.data.port'    => "$port",
-                'hosts.data.service' => "$service"
-            }
-        );
-    }
-    elsif (defined $port) {
-        Utils::log_wrapper(
-            "function=|get_host_info| action=|using_parameter_port| desc=|| info=|PORT:$port|"
-        );
-        $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})->find(
-            {
-                timestamp         => "$scan_number",
-                'hosts.addr'      => $addr,
-                'hosts.data.port' => "$port"
-            }
-        );
-    }
-    elsif (defined $service) {
-        Utils::log_wrapper(
-            "function=|get_host_info| action=|using_parameter_service| desc=|| info=|SERVICE:$service|"
-        );
-        $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})->find(
-            {
-                timestamp            => "$scan_number",
-                'hosts.addr'         => $addr,
-                'hosts.data.service' => "$service"
-            }
-        );
-    }
-    else {
-        Utils::log_wrapper(
-            'function=|get_host_info| action=|no_using_parameter| desc=|| info=||'
-        );
-        $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})
-            ->find({timestamp => "$scan_number", 'hosts.addr' => $addr});
-    }
+    #  buscando dados do scan no mongo
+    my $scans = $db->get_collection($ENV{NMAP_API_SCAN_COLLECTION})
+        ->find({timestamp => "$scan_number"});
 
+    #  verificando se somente um scan foi retornado
     my $scan_count = $scans->count;
     if ($scan_count != 1) {
         return Utils::error('108', "IP:$addr SCAN:$scan_number");
     }
-    my $scan      = $scans->next;
-    my $scan_info = $scan->{hosts}[0];
+    my $scan      = $scans->next; # carregando o scan
 
-    # Fazendo merge dos hashs
-    my %scans_ = (scans => $doc->{scans},);
-    my %all_info = %{merge($scan_info, \%scans_)};
+    #  separando os dados do addr passado para a funcao
+    my $scan_info;
+    foreach my $host (@{$scan->{hosts}}){
+        if ($host->{addr} eq $addr) {
+            $scan_info = $host;
+        }
+    }
 
-    return \%all_info;
+    #  filtrando pelos criterios de porta/servico/nada
+    if (defined $port && defined $service) {
+        Utils::log_wrapper(
+            "function=|get_host_info| action=|using_parameters_port_service| desc=|| addr=|$addr| info=|PORT:$port SERVICE:$service|"
+        );
+
+        # conferindo se host tem porta e servico
+        foreach my $data (@{$scan_info->{data}}) {
+            if ($data->{port} eq $port && $data->{service} eq $service) {
+                return $scan_info;
+            }
+        }
+    }
+    elsif (defined $port) {
+        Utils::log_wrapper(
+            "function=|get_host_info| action=|using_parameter_port| desc=|| addr=|$addr| info=|PORT:$port|"
+        );
+
+        # conferindo se host tem porta
+        foreach my $data (@{$scan_info->{data}}) {
+            if ($data->{port} eq $port) {
+                return $scan_info;
+            }
+        }
+    }
+    elsif (defined $service) {
+        Utils::log_wrapper(
+            "function=|get_host_info| action=|using_parameter_service| desc=|| addr=|$addr| info=|SERVICE:$service|"
+        );
+
+        # conferindo se host tem porta e servico
+        foreach my $data (@{$scan_info->{data}}) {
+            if ($data->{service} eq $service) {
+                return $scan_info;
+            }
+        }
+
+    }
+    else {
+        Utils::log_wrapper(
+            "function=|get_host_info| action=|no_using_parameter| desc=|| addr=|$addr| info=||"
+        );
+
+        #  nao tem nenhum criterio, so retornar informacao do host
+        return $scan_info;
+    }
+
+    return {'result' => 'not found'};
 }
 
 #######################################
