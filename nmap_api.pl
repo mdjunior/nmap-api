@@ -296,7 +296,7 @@ sub net {
         "function=|net| action=|list| desc=|| info=|$net $mask|");
     my $bits = $n->bits();
     for my $ip (@{$n->splitref($bits)}) {    # laco com cada IP da rede
-        my $host_hash = host($ip->addr, undef, $port, $service);
+        my $host_hash = get_host_info($ip->addr, undef, $port, $service);
         if (!defined $host_hash->{result}) {
             $net_info{$ip->addr} = $host_hash;
         }
